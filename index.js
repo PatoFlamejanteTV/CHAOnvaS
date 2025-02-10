@@ -21,7 +21,7 @@ const canvas = Array(30)
 }*/
 
 // Load most recent backup if exists
-try {
+/*try {
   const backupFiles = fs.readdirSync("backup").sort().reverse();
   if (backupFiles.length > 0) {
     const backup = JSON.parse(fs.readFileSync(`backup/${backupFiles[0]}`));
@@ -45,7 +45,7 @@ if (ENABLE_BACKUP) {
     fs.writeFileSync(`backup/${filename}`, JSON.stringify(canvas));
     console.log(`Canvas backup created: ${filename}`);
   }, BACKUP_INTERVAL);
-}
+}*/
 
 // Rate limiter: max 1 request per 100ms per IP
 const rateLimiter = new RateLimiterMemory({
