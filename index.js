@@ -93,7 +93,12 @@ app.get('/', (req, res) => {
     <head>
       <title>r/place Clone</title>
       <style>
-        canvas { border: 1px solid black; }
+        canvas { 
+          border: 1px solid black;
+          image-rendering: pixelated;
+          width: 400px;
+          height: 300px;
+        }
       </style>
     </head>
     <body>
@@ -120,8 +125,8 @@ app.get('/', (req, res) => {
         // Handle clicks
         canvas.onclick = async (e) => {
           const rect = canvas.getBoundingClientRect();
-          const x = Math.floor(e.clientX - rect.left);
-          const y = Math.floor(e.clientY - rect.top);
+          const x = Math.floor((e.clientX - rect.left) * (40 / rect.width));
+          const y = Math.floor((e.clientY - rect.top) * (30 / rect.height));
           const color = colorPicker.value;
           
           const res = await fetch('/pixel', {
