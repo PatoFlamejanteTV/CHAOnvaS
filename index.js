@@ -9,17 +9,17 @@ app.use(express.json());
 app.use(cors());
 
 const ENABLE_BACKUP = true; // Toggle backup functionality
-const BACKUP_INTERVAL = 60000; // 1 minute in milliseconds
+const BACKUP_INTERVAL = 10000; // In ms
 
-// Create 400x300 canvas with white pixels
-const canvas = Array(300).fill().map(() => Array(400).fill('#FFFFFF'));
+// Create 40x30 canvas with white pixels
+const canvas = Array(30).fill().map(() => Array(40).fill('#FFFFFF'));
 
 // Load backup if exists
 try {
   const backup = JSON.parse(fs.readFileSync('canvas_backup.json'));
-  if (backup.length === 300 && backup[0].length === 400) {
-    for (let y = 0; y < 300; y++) {
-      for (let x = 0; x < 400; x++) {
+  if (backup.length === 30 && backup[0].length === 40) {
+    for (let y = 0; y < 30; y++) {
+      for (let x = 0; x < 40; x++) {
         canvas[y][x] = backup[y][x];
       }
     }
@@ -56,8 +56,8 @@ app.post('/pixel', async (req, res) => {
     const { x, y, color } = req.body;
     
     // Validate inputs
-    if (!Number.isInteger(x) || x < 0 || x >= 400 ||
-        !Number.isInteger(y) || y < 0 || y >= 300 ||
+    if (!Number.isInteger(x) || x < 0 || x >= 40 ||
+        !Number.isInteger(y) || y < 0 || y >= 30 ||
         !/^#[0-9A-F]{6}$/i.test(color)) {
       return res.status(400).json({ error: 'Invalid input' });
     }
@@ -87,7 +87,7 @@ app.get('/', (req, res) => {
       </style>
     </head>
     <body>
-      <canvas id="canvas" width="400" height="300"></canvas>
+      <canvas id="canvas" width="40" height="30"></canvas>
       <br>
       <input type="color" id="colorPicker" value="#000000">
       <script>
