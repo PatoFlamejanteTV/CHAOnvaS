@@ -1,8 +1,9 @@
+import { Analytics } from "@vercel/analytics/react";
 
-const express = require('express');
-const cors = require('cors');
-const fs = require('fs');
-const { RateLimiterMemory } = require('rate-limiter-flexible');
+const express = require("express");
+const cors = require("cors");
+const fs = require("fs");
+const { RateLimiterMemory } = require("rate-limiter-flexible");
 
 const app = express();
 app.use(express.json());
@@ -12,16 +13,18 @@ const ENABLE_BACKUP = true; // Toggle backup functionality
 const BACKUP_INTERVAL = 10000; // In ms
 
 // Create 40x30 canvas with white pixels
-const canvas = Array(30).fill().map(() => Array(40).fill('#FFFFFF'));
+const canvas = Array(30)
+  .fill()
+  .map(() => Array(40).fill("#FFFFFF"));
 
 // Create backup directory if it doesn't exist
-if (!fs.existsSync('backup')) {
-  fs.mkdirSync('backup');
+if (!fs.existsSync("backup")) {
+  fs.mkdirSync("backup");
 }
 
 // Load most recent backup if exists
 try {
-  const backupFiles = fs.readdirSync('backup').sort().reverse();
+  const backupFiles = fs.readdirSync("backup").sort().reverse();
   if (backupFiles.length > 0) {
     const backup = JSON.parse(fs.readFileSync(`backup/${backupFiles[0]}`));
     if (backup.length === 30 && backup[0].length === 40) {
@@ -33,7 +36,7 @@ try {
     }
   }
 } catch (err) {
-  console.log('No backup found or invalid backup, starting with fresh canvas');
+  console.log("No backup found or invalid backup, starting with fresh canvas");
 }
 
 // Setup backup interval
@@ -49,44 +52,49 @@ if (ENABLE_BACKUP) {
 // Rate limiter: max 1 request per 100ms per IP
 const rateLimiter = new RateLimiterMemory({
   points: 1,
-  duration: 0.1
+  duration: 0.1,
 });
 
 // Get full canvas
-app.get('/canvas', (req, res) => {
+app.get("/canvas", (req, res) => {
   res.json(canvas);
 });
 
 // Place pixel
-app.post('/pixel', async (req, res) => {
+app.post("/pixel", async (req, res) => {
   try {
     // Check rate limit
     await rateLimiter.consume(req.ip);
-    
+
     const { x, y, color } = req.body;
-    
+
     // Validate inputs
-    if (!Number.isInteger(x) || x < 0 || x >= 40 ||
-        !Number.isInteger(y) || y < 0 || y >= 30 ||
-        !/^#[0-9A-F]{6}$/i.test(color)) {
-      return res.status(400).json({ error: 'Invalid input' });
+    if (
+      !Number.isInteger(x) ||
+      x < 0 ||
+      x >= 40 ||
+      !Number.isInteger(y) ||
+      y < 0 ||
+      y >= 30 ||
+      !/^#[0-9A-F]{6}$/i.test(color)
+    ) {
+      return res.status(400).json({ error: "Invalid input" });
     }
-    
+
     // Update pixel
     canvas[y][x] = color;
     res.json({ success: true });
-    
   } catch (error) {
     if (error.consumedPoints) {
-      res.status(429).json({ error: 'Too many requests' });
+      res.status(429).json({ error: "Too many requests" });
     } else {
-      res.status(500).json({ error: 'Internal server error' });
+      res.status(500).json({ error: "Internal server error" });
     }
   }
 });
 
 // Serve simple HTML interface
-app.get('/', (req, res) => {
+app.get("/", (req, res) => {
   res.send(`
     <!DOCTYPE html>
     <html>
@@ -147,6 +155,6 @@ app.get('/', (req, res) => {
 });
 
 const port = 3000;
-app.listen(port, '0.0.0.0', () => {
+app.listen(port, "0.0.0.0", () => {
   console.log(`CHAOnvaS running on port ${port}`);
 });
