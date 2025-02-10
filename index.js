@@ -26,7 +26,7 @@ app.get("/canvas", (req, res) => {
 app.post("/pixel", async (req, res) => {
   try {
     // Check rate limit
-    await rateLimiter.consume(req.ip);
+    //await rateLimiter.consume(req.ip);
 
     const { x, y, color } = req.body;
 
@@ -47,11 +47,11 @@ app.post("/pixel", async (req, res) => {
     canvas[y][x] = color;
     res.json({ success: true });
   } catch (error) {
-    if (error.consumedPoints) {
+    /*if (error.consumedPoints) {
       res.status(429).json({ error: "Too many requests" });
     } else {
       res.status(500).json({ error: "Internal server error" });
-    }
+    }*/
   }
 });
 
