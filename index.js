@@ -91,7 +91,7 @@ app.get('/', (req, res) => {
     <!DOCTYPE html>
     <html>
     <head>
-      <title>r/place Clone</title>
+      <title>CHAOnvaS</title>
       <style>
         canvas { 
           border: 1px solid black;
@@ -148,5 +148,5 @@ app.get('/', (req, res) => {
 
 const port = 3000;
 app.listen(port, '0.0.0.0', () => {
-  console.log(`Server running on port ${port}`);
+  console.log(`CHAOnvaS running on port ${port}`);
 });
