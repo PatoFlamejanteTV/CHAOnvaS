@@ -94,8 +94,8 @@ app.get("/", (req, res) => {
             });
         }
 
-        // Refresh canvas every 5 seconds
-        setInterval(loadCanvas, 5000);
+        // Refresh canvas every 1 seconds
+        setInterval(loadCanvas, 1000);
 
         loadCanvas();
 
