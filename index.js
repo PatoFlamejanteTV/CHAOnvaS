@@ -16,9 +16,9 @@ const canvas = Array(30)
   .map(() => Array(40).fill("#FFFFFF"));
 
 // Create backup directory if it doesn't exist
-if (!fs.existsSync("backup")) {
+/*if (!fs.existsSync("backup")) {
   fs.mkdirSync("backup");
-}
+}*/
 
 // Load most recent backup if exists
 try {
