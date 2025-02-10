@@ -7,7 +7,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-const ENABLE_BACKUP = true; // Toggle backup functionality
+const ENABLE_BACKUP = false; // Toggle backup functionality
 const BACKUP_INTERVAL = 60000; // In ms
 
 // Create 40x30 canvas with white pixels
