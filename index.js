@@ -81,16 +81,23 @@ app.get("/", (req, res) => {
         const colorPicker = document.getElementById('colorPicker');
 
         // Load initial canvas
-        fetch('/canvas')
-          .then(res => res.json())
-          .then(data => {
-            data.forEach((row, y) => {
-              row.forEach((color, x) => {
-                ctx.fillStyle = color;
-                ctx.fillRect(x, y, 1, 1);
+        function loadCanvas() {
+          fetch('/canvas')
+            .then(res => res.json())
+            .then(data => {
+              data.forEach((row, y) => {
+                row.forEach((color, x) => {
+                  ctx.fillStyle = color;
+                  ctx.fillRect(x, y, 1, 1);
+                });
               });
             });
-          });
+        }
+
+        // Refresh canvas every 5 seconds
+        setInterval(loadCanvas, 5000);
+
+        loadCanvas();
 
         let isDrawing = false;
         let lastX = -1;
