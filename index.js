@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const { RateLimiterMemory } = require("rate-limiter-flexible");
+//const { RateLimiterMemory } = require("rate-limiter-flexible");
 
 const app = express();
 app.use(express.json());
@@ -12,10 +12,10 @@ const canvas = Array(130)
   .map(() => Array(140).fill("#FFFFFF"));
 
 // Rate limiter: max 1 request per 10ms per IP
-const rateLimiter = new RateLimiterMemory({
+/*const rateLimiter = new RateLimiterMemory({
   points: 10,
   duration: 0.01,
-});
+});*/
 
 // Get full canvas
 app.get("/canvas", (req, res) => {
@@ -94,8 +94,8 @@ app.get("/", (req, res) => {
             });
         }
 
-        // Refresh canvas every 0.1 seconds
-        setInterval(loadCanvas, 100);
+        // Refresh canvas every 3 seconds
+        setInterval(loadCanvas, 3000);
 
         loadCanvas();
 
