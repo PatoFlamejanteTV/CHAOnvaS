@@ -1,14 +1,40 @@
 
 const express = require('express');
 const cors = require('cors');
+const fs = require('fs');
 const { RateLimiterMemory } = require('rate-limiter-flexible');
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
+const ENABLE_BACKUP = true; // Toggle backup functionality
+const BACKUP_INTERVAL = 60000; // 1 minute in milliseconds
+
 // Create 400x300 canvas with white pixels
 const canvas = Array(300).fill().map(() => Array(400).fill('#FFFFFF'));
+
+// Load backup if exists
+try {
+  const backup = JSON.parse(fs.readFileSync('canvas_backup.json'));
+  if (backup.length === 300 && backup[0].length === 400) {
+    for (let y = 0; y < 300; y++) {
+      for (let x = 0; x < 400; x++) {
+        canvas[y][x] = backup[y][x];
+      }
+    }
+  }
+} catch (err) {
+  console.log('No backup found or invalid backup, starting with fresh canvas');
+}
+
+// Setup backup interval
+if (ENABLE_BACKUP) {
+  setInterval(() => {
+    fs.writeFileSync('canvas_backup.json', JSON.stringify(canvas));
+    console.log('Canvas backup created');
+  }, BACKUP_INTERVAL);
+}
 
 // Rate limiter: max 1 request per 100ms per IP
 const rateLimiter = new RateLimiterMemory({
