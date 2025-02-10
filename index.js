@@ -8,7 +8,7 @@ app.use(express.json());
 app.use(cors());
 
 const ENABLE_BACKUP = true; // Toggle backup functionality
-const BACKUP_INTERVAL = 10000; // In ms
+const BACKUP_INTERVAL = 60000; // In ms
 
 // Create 40x30 canvas with white pixels
 const canvas = Array(30)
@@ -152,7 +152,6 @@ app.get("/", (req, res) => {
   `);
 });
 
-const port = 3000;
-app.listen(port, "0.0.0.0", () => {
-  console.log(`CHAOnvaS running on port ${port}`);
-});
+app.listen(3000, () => {
+  console.log('Server listening on port 3000');
+}); // you can also change to any port, remember to also update the ports config file (if theres any)
