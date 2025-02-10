@@ -14,7 +14,7 @@ const canvas = Array(130)
 // Rate limiter: max 1 request per 10ms per IP
 const rateLimiter = new RateLimiterMemory({
   points: 10,
-  duration: 0.1,
+  duration: 0.01,
 });
 
 // Get full canvas
@@ -94,8 +94,8 @@ app.get("/", (req, res) => {
             });
         }
 
-        // Refresh canvas every 1 seconds
-        setInterval(loadCanvas, 1000);
+        // Refresh canvas every 0.1 seconds
+        setInterval(loadCanvas, 100);
 
         loadCanvas();
 
