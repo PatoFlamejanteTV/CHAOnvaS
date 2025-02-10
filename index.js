@@ -1,55 +1,19 @@
 const express = require("express");
 const cors = require("cors");
-const fs = require("fs");
 const { RateLimiterMemory } = require("rate-limiter-flexible");
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-const ENABLE_BACKUP = false; // Toggle backup functionality
-const BACKUP_INTERVAL = 60000; // In ms
-
-// Create 40x30 canvas with white pixels
-const canvas = Array(30)
+// Create 140x130 canvas with white pixels
+const canvas = Array(130)
   .fill()
-  .map(() => Array(40).fill("#FFFFFF"));
+  .map(() => Array(140).fill("#FFFFFF"));
 
-// Create backup directory if it doesn't exist
-/*if (!fs.existsSync("backup")) {
-  fs.mkdirSync("backup");
-}*/
-
-// Load most recent backup if exists
-/*try {
-  const backupFiles = fs.readdirSync("backup").sort().reverse();
-  if (backupFiles.length > 0) {
-    const backup = JSON.parse(fs.readFileSync(`backup/${backupFiles[0]}`));
-    if (backup.length === 30 && backup[0].length === 40) {
-      for (let y = 0; y < 30; y++) {
-        for (let x = 0; x < 40; x++) {
-          canvas[y][x] = backup[y][x];
-        }
-      }
-    }
-  }
-} catch (err) {
-  console.log("No backup found or invalid backup, starting with fresh canvas");
-}
-
-// Setup backup interval
-if (ENABLE_BACKUP) {
-  setInterval(() => {
-    const date = new Date();
-    const filename = `${date.getDate()}.${date.getMonth() + 1}.${date.getHours()}.${date.getMinutes()}.${date.getSeconds()}.json`;
-    fs.writeFileSync(`backup/${filename}`, JSON.stringify(canvas));
-    console.log(`Canvas backup created: ${filename}`);
-  }, BACKUP_INTERVAL);
-}*/
-
-// Rate limiter: max 1 request per 100ms per IP
+// Rate limiter: max 1 request per 10ms per IP
 const rateLimiter = new RateLimiterMemory({
-  points: 1,
+  points: 10,
   duration: 0.1,
 });
 
@@ -70,10 +34,10 @@ app.post("/pixel", async (req, res) => {
     if (
       !Number.isInteger(x) ||
       x < 0 ||
-      x >= 40 ||
+      x >= 140 ||
       !Number.isInteger(y) ||
       y < 0 ||
-      y >= 30 ||
+      y >= 130 ||
       !/^#[0-9A-F]{6}$/i.test(color)
     ) {
       return res.status(400).json({ error: "Invalid input" });
@@ -102,20 +66,20 @@ app.get("/", (req, res) => {
         canvas { 
           border: 1px solid black;
           image-rendering: pixelated;
-          width: 400px;
-          height: 300px;
+          width: 1400px;
+          height: 1300px;
         }
       </style>
     </head>
     <body>
-      <canvas id="canvas" width="40" height="30"></canvas>
+      <canvas id="canvas" width="140" height="130"></canvas>
       <br>
       <input type="color" id="colorPicker" value="#000000">
       <script>
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         const colorPicker = document.getElementById('colorPicker');
-        
+
         // Load initial canvas
         fetch('/canvas')
           .then(res => res.json())
@@ -127,31 +91,75 @@ app.get("/", (req, res) => {
               });
             });
           });
-        
-        // Handle clicks
-        canvas.onclick = async (e) => {
+
+        let isDrawing = false;
+        let lastX = -1;
+        let lastY = -1;
+
+        async function drawPixel(e) {
           const rect = canvas.getBoundingClientRect();
-          const x = Math.floor((e.clientX - rect.left) * (40 / rect.width));
-          const y = Math.floor((e.clientY - rect.top) * (30 / rect.height));
+          const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+          const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+          const x = Math.floor((clientX - rect.left) * (140 / rect.width));
+          const y = Math.floor((clientY - rect.top) * (130 / rect.height));
+
+          if (x === lastX && y === lastY) return;
+          lastX = x;
+          lastY = y;
+
           const color = colorPicker.value;
-          
+
           const res = await fetch('/pixel', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ x, y, color })
           });
-          
+
           if (res.ok) {
             ctx.fillStyle = color;
             ctx.fillRect(x, y, 1, 1);
           }
-        };
+        }
+
+        canvas.addEventListener('mousedown', (e) => {
+          isDrawing = true;
+          drawPixel(e);
+        });
+        canvas.addEventListener('mousemove', (e) => {
+          if (isDrawing) drawPixel(e);
+        });
+        canvas.addEventListener('mouseup', () => {
+          isDrawing = false;
+          lastX = -1;
+          lastY = -1;
+        });
+        canvas.addEventListener('mouseleave', () => {
+          isDrawing = false;
+          lastX = -1;
+          lastY = -1;
+        });
+
+        // Touch events
+        canvas.addEventListener('touchstart', (e) => {
+          e.preventDefault();
+          isDrawing = true;
+          drawPixel(e);
+        });
+        canvas.addEventListener('touchmove', (e) => {
+          e.preventDefault();
+          if (isDrawing) drawPixel(e);
+        });
+        canvas.addEventListener('touchend', () => {
+          isDrawing = false;
+          lastX = -1;
+          lastY = -1;
+        });
       </script>
     </body>
     </html>
   `);
 });
 
-app.listen(3000, () => {
+app.listen(3000, '0.0.0.0', () => {
   console.log('Server listening on port 3000');
-}); // you can also change to any port, remember to also update the ports config file (if theres any)
+});
