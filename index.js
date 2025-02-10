@@ -14,13 +14,21 @@ const BACKUP_INTERVAL = 10000; // In ms
 // Create 40x30 canvas with white pixels
 const canvas = Array(30).fill().map(() => Array(40).fill('#FFFFFF'));
 
-// Load backup if exists
+// Create backup directory if it doesn't exist
+if (!fs.existsSync('backup')) {
+  fs.mkdirSync('backup');
+}
+
+// Load most recent backup if exists
 try {
-  const backup = JSON.parse(fs.readFileSync('canvas_backup.json'));
-  if (backup.length === 30 && backup[0].length === 40) {
-    for (let y = 0; y < 30; y++) {
-      for (let x = 0; x < 40; x++) {
-        canvas[y][x] = backup[y][x];
+  const backupFiles = fs.readdirSync('backup').sort().reverse();
+  if (backupFiles.length > 0) {
+    const backup = JSON.parse(fs.readFileSync(`backup/${backupFiles[0]}`));
+    if (backup.length === 30 && backup[0].length === 40) {
+      for (let y = 0; y < 30; y++) {
+        for (let x = 0; x < 40; x++) {
+          canvas[y][x] = backup[y][x];
+        }
       }
     }
   }
@@ -31,8 +39,10 @@ try {
 // Setup backup interval
 if (ENABLE_BACKUP) {
   setInterval(() => {
-    fs.writeFileSync('canvas_backup.json', JSON.stringify(canvas));
-    console.log('Canvas backup created');
+    const date = new Date();
+    const filename = `${date.getDate()}.${date.getMonth() + 1}.${date.getHours()}.${date.getMinutes()}.${date.getSeconds()}.json`;
+    fs.writeFileSync(`backup/${filename}`, JSON.stringify(canvas));
+    console.log(`Canvas backup created: ${filename}`);
   }, BACKUP_INTERVAL);
 }
 
