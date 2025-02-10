@@ -1,4 +1,4 @@
-import { Analytics } from "@vercel/analytics/react";
+import { inject } from "@vercel/analytics";
 
 const express = require("express");
 const cors = require("cors");
